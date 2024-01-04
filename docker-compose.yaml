@@ -1,7 +1,8 @@
-version: "3.7"
-services:
+version: "3.8"
 
+services:
   tracardi-api:
+    container_name: tracardi-api
     image: tracardi/tracardi-api:0.8.1
     environment:
       ELASTIC_HOST: http://elasticsearch:9200
@@ -12,17 +13,27 @@ services:
     ports:
       - 8686:80
     depends_on:
-      - redis
       - elasticsearch
+      - redis
 
   tracardi-gui:
+    container_name: tracardi-gui
     image: tracardi/tracardi-gui:0.8.1
     ports:
       - 8787:80
     depends_on:
       - tracardi-api
 
+  tracardi-worker:
+    container_name: tracardi-worker
+    image: tracardi/update-worker:0.8.1
+    environment:
+      REDIS_HOST: redis://redis:6379
+    depends_on:
+      - redis
+    
   elasticsearch:
+    container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
     environment:
       bootstrap.memory_lock: "true"
@@ -31,16 +42,13 @@ services:
       xpack.security.enabled: "false"
       cluster.name: contextElasticSearch
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
 
   redis:
+    container_name: redis
     image: redis
 
-  worker:
-    image: tracardi/update-worker:0.8.1
-    environment:
-      REDIS_HOST: redis://redis:6379
-
-volumes:
-  elasticsearch-data:
-    driver: local
+networks:
+  default:
+    name: app
+    external: true
