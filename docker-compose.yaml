@@ -42,7 +42,7 @@ services:
       xpack.security.enabled: "false"
       cluster.name: contextElasticSearch
     volumes:
-      - ./elasticsearch_data:/usr/share/elasticsearch/data
+      - elasticsearch_data:/usr/share/elasticsearch/data
 
   redis:
     container_name: redis
@@ -52,3 +52,7 @@ networks:
   default:
     name: app
     external: true
+
+volumes:
+  elasticsearch_data:
+    driver: local
